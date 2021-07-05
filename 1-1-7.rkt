@@ -1,16 +1,24 @@
 #lang sicp
 
 (define (sqr x) (* x x))
-
 (define (avr x y) (/ (+ x y) 2))
 
-(define (old-ge? g x)
-  (< (abs (- (sqr g) x)) 0.001))
+; orig
+; (define (ge? g x)
+;  (< (abs (- (sqr g) x)) 0.001))
 
-(define (ge? g x)
-  (< (abs (- (i g x) g)) 0.001))
+;(define (ge? g x)
+;  (< (abs (- (i g x) g)) 0.001))
 
 (define (i g x) (avr g (/ x g)))
+; (define (i g x) (< (abs (- (i g x) g)) 0.001))
+
+(define (how-far? g x)
+  (abs (- (sqr g) x)))
+
+(define (ge? g x)
+  ;(and (> (how-far? g x) (how-far? (i g x) x))
+   (< (abs (- (how-far? g x) (how-far? (i g x) x))) 0.000000001)) ;<-is this really refined???
 
 (define (si g x)
   (if (ge? g x)
@@ -21,38 +29,47 @@
   (si 1.0 x))
 
 ; when x gets bigger, its assumption goes inaccurate
-;> (sqrt 1000000)
-;1000.0000000000118
-;> (sqrt 100)
-;10.000000000139897
-;> (sqrt 10000)
-;100.00000025490743
 ; same thing happens when x gets smaller
-;> (sqrt 0.0001)
-;0.03230844833048122
-;> (sqrt 0.000001)
-;0.031260655525445276
-;> (sqrt 0.00000001)
-;0.03125010656242753
+; but when? To check, proper function is required:
 
-; how to check when ge? does not work?
-(define (oiac g x) (and (not (old-ge? g x)) (i g x)))
-(define (iac g x) (and (not (ge? g x)) (i g x)))
-;> (iac 1.0 100)
-;50.5
-;> (iac 50.5 100)
-;26.24009900990099
-;> (iac 26.24009900990099 100)
-;15.025530119986813
-;> (iac 15.025530119986813 100)
-;10.840434673026925
-;> (iac 10.840434673026925 100)
-;10.032578510960604
-;> (iac 1.0 1)
-;#f
-;> (iac 10.032578510960604 100)
-;10.000052895642693
-;> (iac 10.000052895642693 100)
-;10.000000000139897
-;> (iac 10.000000000139897 100)
-;#f
+; returns how far fianl guess val is from radicand
+(define (si-check g x)
+  (if (ge? g x)
+      (abs (- (sqr g) x))
+      (si-check (i g x) x)))
+
+; wrapper
+(define (sqrt-c x)
+  (si-check 1.0 x))
+
+; to check if final guess always gets further from its
+; corresponding radicand. Even it's not, if it shows
+; a tendency, we can use it to prove refined algorithm's
+; more accurate than before.
+(define (r-sqrt-c x)
+    (if (< (sqrt-c x) (sqrt-c (+ x 1)))
+        (r-sqrt-c (+ x 1))
+        x))
+
+; hard to visualize when guess gets smaller
+(define (rsc2 x)
+    (if (< (sqrt-c x) (sqrt-c (/ x 2.0)))
+        (rsc2 (/ x 2.0))
+        x))
+
+#|
+it's not linear, but it seems to have a tendency of getting
+final guess value further from its input radicand.
+> (r-sqrt-c 4)
+9
+> (r-sqrt-c 10)
+30
+> (r-sqrt-c 31)
+99
+> (r-sqrt-c 100)
+330
+> (r-sqrt-c 331)
+1118
+> (r-sqrt-c 1119)
+3831
+|#

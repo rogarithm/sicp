@@ -7,18 +7,11 @@
 ; (define (ge? g x)
 ;  (< (abs (- (sqr g) x)) 0.001))
 
-;(define (ge? g x)
-;  (< (abs (- (i g x) g)) 0.001))
-
 (define (i g x) (avr g (/ x g)))
 ; (define (i g x) (< (abs (- (i g x) g)) 0.001))
 
-(define (how-far? g x)
-  (abs (- (sqr g) x)))
-
 (define (ge? g x)
-  ;(and (> (how-far? g x) (how-far? (i g x) x))
-   (< (abs (- (how-far? g x) (how-far? (i g x) x))) 0.000000001)) ;<-is this really refined???
+  (< (abs (- (i g x) g)) 0.00001))
 
 (define (si g x)
   (if (ge? g x)

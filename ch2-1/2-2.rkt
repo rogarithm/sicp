@@ -14,10 +14,6 @@
 (define (end-segment line)
   (cdr line))
 
-(define (midpoint-segment line)
-  (make-point (avr (x-point (start-segment line)) (x-point (end-segment line)))
-              (avr (y-point (start-segment line)) (y-point (end-segment line)))))
-
 ; for point data
 (define (make-point x y)
   (cons x y))
@@ -27,6 +23,11 @@
 
 (define (y-point point)
   (cdr point))
+
+(define (midpoint-segment line) ;this returns a point from a line
+  (make-point
+   (avr (x-point (start-segment line)) (x-point (end-segment line)))
+   (avr (y-point (start-segment line)) (y-point (end-segment line)))))
 
 ; for printing
 (define (print-point p)
